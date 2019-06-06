@@ -1,5 +1,5 @@
 {
-  "name": "node-transparent-proxy",
+  "name": "node-mitmproxy",
   "version": "0.0.1",
   "description": "a nodejs transparent proxy",
   "main": "index.js",
@@ -9,7 +9,9 @@
   "author": "reallyimeric",
   "license": "ISC",
   "keywords": [
-    "transparent_proxy"
+    "transparent_proxy",
+    "mitm",
+    "mitmproxy"
   ],
   "dependencies": {
     "@types/koa": "^2.0.48",
