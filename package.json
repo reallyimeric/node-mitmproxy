@@ -11,7 +11,12 @@
   "keywords": [
     "transparent_proxy"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "@types/koa": "^2.0.48",
+    "koa": "^2.7.0",
+    "node-fetch": "^2.6.0",
+    "node-getsockopt": "git+https://github.com/reallyimeric/node-getsockopt.git"
+  },
   "devDependencies": {
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.1.0",
