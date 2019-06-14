@@ -45,6 +45,8 @@ export default async function listener(
     try {
         request.pipe(proxyRequest);
         const proxyResponse = await responsePromise;
+        const { headers: proxyHeaders, statusCode } = proxyResponse;
+        response.writeHead(statusCode, proxyHeaders);
         proxyResponse.pipe(response);
     } catch (e) {
         socket.destroy();
