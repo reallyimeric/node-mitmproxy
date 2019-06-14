@@ -1,6 +1,6 @@
 import { IncomingMessage, ClientRequest } from 'http';
 
-export const promisifyClientRequest = (
+export const addListenerForClientRequest = (
     request: ClientRequest,
 ): Promise<IncomingMessage> => new Promise(
     (resolve, reject): void => {
