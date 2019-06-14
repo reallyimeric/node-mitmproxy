@@ -1,6 +1,7 @@
 import { getOriginalDst } from 'node-getsockopt';
 import { promisify } from 'util';
 import { IncomingMessage, ServerResponse } from 'http';
+import { promisifyClientRequest } from './util';
 
 import http = require('http');
 
@@ -27,24 +28,10 @@ export default async function listener(
         port,
         protocol,
     });
-    const responsePromise = new Promise<IncomingMessage>((resolve, reject): void => {
-        proxyRequest.on('response', (proxyResponse: IncomingMessage): void => {
-            resolve(proxyResponse);
-        });
-        proxyRequest.on('error', (err): void => {
-            reject(err);
-        });
-        proxyRequest.on('abort', (): void => {
-            reject(new Error('aborted'));
-        });
-        proxyRequest.on('timeout', (): void => {
-            proxyRequest.abort();
-        });
-    });
 
     try {
         request.pipe(proxyRequest);
-        const proxyResponse = await responsePromise;
+        const proxyResponse = await promisifyClientRequest(proxyRequest);
         const { headers: proxyHeaders, statusCode } = proxyResponse;
         response.writeHead(statusCode, proxyHeaders);
         proxyResponse.pipe(response);
