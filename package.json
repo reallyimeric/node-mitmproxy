@@ -14,18 +14,15 @@
     "mitmproxy"
   ],
   "dependencies": {
-    "@types/koa": "^2.0.48",
-    "koa": "^2.7.0",
-    "node-fetch": "^2.6.0",
     "node-getsockopt": "git+https://github.com/reallyimeric/node-getsockopt.git"
   },
   "devDependencies": {
+    "@types/node": "^12.0.8",
+    "@typescript-eslint/eslint-plugin": "^1.10.2",
+    "@typescript-eslint/parser": "^1.10.2",
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.17.3",
-    "@types/node": "^12.0.3",
-    "@typescript-eslint/eslint-plugin": "^1.9.0",
-    "@typescript-eslint/parser": "^1.9.0",
-    "typescript": "^3.4.5"
+    "typescript": "^3.5.2"
   }
 }

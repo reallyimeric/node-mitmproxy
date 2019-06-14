@@ -1,9 +1,9 @@
 import listener from './listener';
 
-import Koa = require('koa');
+import http = require('http');
 
 const PORT = 42926;
-const app = new Koa();
-app.use(listener);
+const server = http.createServer();
+server.on('request', listener);
 
-app.listen(PORT);
+server.listen(PORT);

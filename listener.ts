@@ -1,22 +1,52 @@
-import { Context } from 'koa';
-import fetch from 'node-fetch';
 import { getOriginalDst } from 'node-getsockopt';
 import { promisify } from 'util';
+import { IncomingMessage, ServerResponse } from 'http';
+
+import http = require('http');
 
 const getOriginalDstAsync = promisify(getOriginalDst);
 
-export default async function listener(ctx: Context, next): Promise<void> {
-    const { req, request } = ctx;
-    const { socket } = req;
+export default async function listener(
+    request: IncomingMessage,
+    response: ServerResponse,
+): Promise<void> {
+    const {
+        headers, socket, method, url,
+    } = request;
+    const protocol = 'http:';
     const addrInfo = await getOriginalDstAsync(socket);
-    const { path, headers } = request;
-    // const init = {
-    //     method: req.method,
-    //     headers,
-    //     keepalive: true,
-    //     body: ,
-    // };
-    // const serverRes = await fetch(`http://${addrInfo.address}:${addrInfo.port}${path}`, init);
-    await next();
-    // ctx.
+    const { address: hostname, port, family } = addrInfo;
+
+    const proxyRequest = http.request({
+        agent: false,
+        family,
+        headers,
+        hostname,
+        method,
+        path: url,
+        port,
+        protocol,
+    });
+    const responsePromise = new Promise<IncomingMessage>((resolve, reject): void => {
+        proxyRequest.on('response', (proxyResponse: IncomingMessage): void => {
+            resolve(proxyResponse);
+        });
+        proxyRequest.on('error', (err): void => {
+            reject(err);
+        });
+        proxyRequest.on('abort', (): void => {
+            reject(new Error('aborted'));
+        });
+        proxyRequest.on('timeout', (): void => {
+            proxyRequest.abort();
+        });
+    });
+
+    try {
+        request.pipe(proxyRequest);
+        const proxyResponse = await responsePromise;
+        proxyResponse.pipe(response);
+    } catch (e) {
+        socket.destroy();
+    }
 }
