@@ -29,3 +29,12 @@ export const shouldRedirect = (statusCode: number): boolean => {
     if (statusCode >= 500 && statusCode < 600) return true;
     throw new Error('invalid code');
 };
+
+export const isStatusOk = (statusCode: number): boolean => {
+    if (statusCode >= 100 && statusCode < 200) return true;
+    if (statusCode >= 200 && statusCode < 300) return true;
+    if (statusCode >= 300 && statusCode < 400) return true;
+    if (statusCode >= 400 && statusCode < 500) return false;
+    if (statusCode >= 500 && statusCode < 600) return false;
+    throw new Error('invalid code');
+};
