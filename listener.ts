@@ -1,6 +1,7 @@
 import { getOriginalDst } from 'node-getsockopt';
 import { promisify } from 'util';
 import { IncomingMessage, ServerResponse } from 'http';
+import { PassThrough } from 'stream';
 import { addListenerForClientRequest, shouldRedirect, isStatusOk } from './util';
 import { MOCK_HOST, MOCK_PORT } from './env';
 
@@ -32,7 +33,9 @@ export default async function listener(
 
     try {
         const proxyResponsePromise = addListenerForClientRequest(proxyRequest);
+        const backup = new PassThrough();
         request.pipe(proxyRequest);
+        request.pipe(backup);
         const proxyResponse = await proxyResponsePromise;
         const { headers: proxyHeaders, statusCode } = proxyResponse;
         if (shouldRedirect(statusCode)) {
@@ -49,7 +52,7 @@ export default async function listener(
             });
             try {
                 const mockResponsePromise = addListenerForClientRequest(mockRequest);
-                request.pipe(mockRequest);
+                backup.pipe(mockRequest);
                 const mockResponse = await mockResponsePromise;
                 const { headers: mockHeaders, statusCode: mockStatusCode } = mockResponse;
                 if (isStatusOk(mockStatusCode)) {
