@@ -31,9 +31,9 @@ export default async function listener(
     });
 
     try {
-        const proxyRequestPromise = addListenerForClientRequest(proxyRequest);
+        const proxyResponsePromise = addListenerForClientRequest(proxyRequest);
         request.pipe(proxyRequest);
-        const proxyResponse = await proxyRequestPromise;
+        const proxyResponse = await proxyResponsePromise;
         const { headers: proxyHeaders, statusCode } = proxyResponse;
         if (shouldRedirect(statusCode)) {
             // if should redirect
