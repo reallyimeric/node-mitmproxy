@@ -38,3 +38,13 @@ export const isStatusOk = (statusCode: number): boolean => {
     if (statusCode >= 500 && statusCode < 600) return false;
     throw new Error('invalid code');
 };
+
+export const convertIPAddressFamily = (
+    addrString?: 'IPv4'|'IPv6',
+): 4 | 6 | undefined => {
+    switch (addrString) {
+        case 'IPv4': return 4;
+        case 'IPv6': return 6;
+        default: return undefined;
+    }
+};

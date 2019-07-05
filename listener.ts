@@ -1,13 +1,18 @@
-import { getOriginalDst } from 'node-getsockopt';
+import { getOriginalDst, SocketAddress } from 'node-getsockopt';
 import { promisify } from 'util';
 import { IncomingMessage, ServerResponse } from 'http';
 import { PassThrough } from 'stream';
-import { addListenerForClientRequest, shouldRedirect, isStatusOk } from './util';
+import { Socket } from 'net';
+import {
+    addListenerForClientRequest,
+    convertIPAddressFamily,
+    shouldRedirect, isStatusOk,
+} from './util';
 import { MOCK_HOST, MOCK_PORT } from './env';
 
 import http = require('http');
 
-const getOriginalDstAsync = promisify(getOriginalDst);
+const getOriginalDstAsync = promisify<Socket, SocketAddress>(getOriginalDst);
 
 export default async function listener(
     request: IncomingMessage,
@@ -22,7 +27,7 @@ export default async function listener(
 
     const proxyRequest = http.request({
         agent: false,
-        family,
+        family: convertIPAddressFamily(family),
         headers,
         hostname,
         method,
@@ -38,11 +43,11 @@ export default async function listener(
         request.pipe(backup);
         const proxyResponse = await proxyResponsePromise;
         const { headers: proxyHeaders, statusCode } = proxyResponse;
-        if (shouldRedirect(statusCode)) {
+        if (shouldRedirect(statusCode as number)) {
             // if should redirect
             const mockRequest = http.request({
                 agent: false,
-                family,
+                family: convertIPAddressFamily(family),
                 headers,
                 hostname: MOCK_HOST,
                 method,
@@ -55,8 +60,8 @@ export default async function listener(
                 backup.pipe(mockRequest);
                 const mockResponse = await mockResponsePromise;
                 const { headers: mockHeaders, statusCode: mockStatusCode } = mockResponse;
-                if (isStatusOk(mockStatusCode)) {
-                    response.writeHead(mockStatusCode, mockHeaders);
+                if (isStatusOk(mockStatusCode as number)) {
+                    response.writeHead(mockStatusCode as number, mockHeaders);
                     proxyResponse.pipe(response);
                 } else {
                     // if mock not ok
@@ -64,12 +69,12 @@ export default async function listener(
                 }
             } catch (e) {
                 // if failed on mock
-                response.writeHead(statusCode, proxyHeaders);
+                response.writeHead(statusCode as number, proxyHeaders);
                 proxyResponse.pipe(response);
             }
         } else {
             // if should not redirect
-            response.writeHead(statusCode, proxyHeaders);
+            response.writeHead(statusCode as number, proxyHeaders);
             proxyResponse.pipe(response);
         }
     } catch (e) {
